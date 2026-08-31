@@ -2,13 +2,14 @@ using UnityEngine;
 
 public readonly struct EnemyStats
 {
-    public EnemyStats(int hp, float damage, float moveSpeed, float contactInterval, int xpReward)
+    public EnemyStats(int hp, float damage, float moveSpeed, float contactInterval, int xpReward, float sizeMultiplier)
     {
         HP = hp;
         Damage = damage;
         MoveSpeed = moveSpeed;
         ContactInterval = contactInterval;
         XPReward = xpReward;
+        SizeMultiplier = sizeMultiplier;
     }
 
     public int HP { get; }
@@ -16,10 +17,14 @@ public readonly struct EnemyStats
     public float MoveSpeed { get; }
     public float ContactInterval { get; }
     public int XPReward { get; }
+    public float SizeMultiplier { get; }
 }
 
 public class Enemy : MonoBehaviour
 {
+    private const float HealthPickupDropChance = 0.12f;
+    private const int HealthPickupHealAmount = 25;
+
     public int CurrentHP { get; private set; }
 
     private Transform playerTransform;
@@ -109,8 +114,20 @@ public class Enemy : MonoBehaviour
         dead = true;
         GameManager.Instance.EnemyManager.Unregister(this);
         waveManager.NotifyEnemyKilled();
+        PuffPewAudio.PlayKill();
         XPOrb.Create(transform.position, xpReward);
+        TryDropHealthPickup();
         Destroy(gameObject);
+    }
+
+    private void TryDropHealthPickup()
+    {
+        if (Random.value > HealthPickupDropChance)
+        {
+            return;
+        }
+
+        HealthPickup.Create(transform.position, HealthPickupHealAmount);
     }
 
     private void OnDestroy()

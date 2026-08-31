@@ -28,6 +28,7 @@ public class PlayerStats : MonoBehaviour
         int actualDamage = Mathf.Max(1, Mathf.RoundToInt(incomingDamage) - Defense);
         CurrentHP = Mathf.Max(0, CurrentHP - actualDamage);
         GameManager.Instance.SpawnFloatingText(actualDamage.ToString(), transform.position + Vector3.up * 1.2f, new Color(1f, 0.45f, 0.45f));
+        PuffPewAudio.PlayHurt();
 
         if (CurrentHP <= 0)
         {
@@ -56,6 +57,22 @@ public class PlayerStats : MonoBehaviour
                 MoveSpeed *= 1.10f;
                 break;
         }
+    }
+
+    public bool Heal(int amount)
+    {
+        if (GameManager.Instance == null || GameManager.Instance.IsTerminalState || amount <= 0)
+        {
+            return false;
+        }
+
+        if (CurrentHP >= MaxHP)
+        {
+            return false;
+        }
+
+        CurrentHP = Mathf.Min(MaxHP, CurrentHP + amount);
+        return true;
     }
 
     public float GetScaledDamage(float baseDamage)

@@ -33,7 +33,7 @@ public abstract class WeaponBase : MonoBehaviour
             return;
         }
 
-        if (TryAttack())
+        if (TryAttack() || ShouldUseCooldownOnMiss())
         {
             cooldown = ownerStats.GetScaledInterval(baseAttackInterval);
         }
@@ -47,6 +47,11 @@ public abstract class WeaponBase : MonoBehaviour
     protected float GetDamage()
     {
         return ownerStats.GetScaledDamage(baseDamage);
+    }
+
+    protected virtual bool ShouldUseCooldownOnMiss()
+    {
+        return false;
     }
 
     protected abstract bool TryAttack();

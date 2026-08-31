@@ -14,7 +14,7 @@ public class FloatingText : MonoBehaviour
         textMesh.fontSize = 4f;
         textMesh.alignment = TextAlignmentOptions.Center;
         textMesh.color = color;
-        textMesh.sortingOrder = 50;
+        textMesh.sortingOrder = 100;
     }
 
     private void Update()

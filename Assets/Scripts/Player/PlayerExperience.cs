@@ -19,7 +19,7 @@ public class PlayerExperience : MonoBehaviour
         {
             CurrentXP -= RequiredXP;
             Level++;
-            RequiredXP = Mathf.RoundToInt(RequiredXP * 1.25f);
+            RequiredXP = Mathf.CeilToInt((RequiredXP * 1.25f) / 10f) * 10;
             PendingLevelUps++;
         }
 

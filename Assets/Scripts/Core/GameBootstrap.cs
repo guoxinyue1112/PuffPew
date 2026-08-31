@@ -16,7 +16,7 @@ public class GameBootstrap : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void AutoBootstrap()
     {
-        if (FindFirstObjectByType<GameManager>() != null)
+        if (FindAnyObjectByType<GameManager>() != null)
         {
             return;
         }
@@ -33,6 +33,7 @@ public class GameBootstrap : MonoBehaviour
     private void BuildGame()
     {
         Sprite squareSprite = RuntimeSpriteFactory.GetSquareSprite();
+        PuffPewAudio.Initialize();
 
         Camera mainCamera = Camera.main;
         if (mainCamera == null)
@@ -73,14 +74,33 @@ public class GameBootstrap : MonoBehaviour
 
         GameObject enemySpawnerObject = new("EnemySpawner");
         EnemySpawner enemySpawner = enemySpawnerObject.AddComponent<EnemySpawner>();
-        enemySpawner.Initialize(playerObject.transform, squareSprite);
+        enemySpawner.Initialize(playerObject.transform, PuffPewArt.GetEnemySprite() != null ? PuffPewArt.GetEnemySprite() : squareSprite);
         waveManager.Initialize(enemyManager, enemySpawner);
 
         GameObject uiRoot = CreateCanvasRoot();
-        HUDController hudController = uiRoot.AddComponent<HUDController>();
-        LevelUpUI levelUpUI = uiRoot.AddComponent<LevelUpUI>();
-        WeaponChoiceUI weaponChoiceUI = uiRoot.AddComponent<WeaponChoiceUI>();
-        EndGameUI endGameUI = uiRoot.AddComponent<EndGameUI>();
+        HUDController hudController = uiRoot.GetComponent<HUDController>();
+        if (hudController == null)
+        {
+            hudController = uiRoot.AddComponent<HUDController>();
+        }
+
+        LevelUpUI levelUpUI = uiRoot.GetComponent<LevelUpUI>();
+        if (levelUpUI == null)
+        {
+            levelUpUI = uiRoot.AddComponent<LevelUpUI>();
+        }
+
+        WeaponChoiceUI weaponChoiceUI = uiRoot.GetComponent<WeaponChoiceUI>();
+        if (weaponChoiceUI == null)
+        {
+            weaponChoiceUI = uiRoot.AddComponent<WeaponChoiceUI>();
+        }
+
+        EndGameUI endGameUI = uiRoot.GetComponent<EndGameUI>();
+        if (endGameUI == null)
+        {
+            endGameUI = uiRoot.AddComponent<EndGameUI>();
+        }
 
         hudController.BuildUI();
         levelUpUI.BuildUI();
@@ -107,9 +127,14 @@ public class GameBootstrap : MonoBehaviour
         playerObject.transform.position = Vector3.zero;
 
         SpriteRenderer spriteRenderer = playerObject.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = squareSprite;
-        spriteRenderer.color = new Color(0.35f, 0.85f, 1f);
-        playerObject.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
+        Sprite playerSprite = PuffPewArt.GetPlayerRightSprite();
+        spriteRenderer.sprite = playerSprite != null ? playerSprite : squareSprite;
+        spriteRenderer.color = playerSprite != null ? Color.white : new Color(0.35f, 0.85f, 1f);
+        spriteRenderer.sortingOrder = 10;
+        if (playerSprite == null)
+        {
+            playerObject.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
+        }
 
         Rigidbody2D rigidbody2D = playerObject.AddComponent<Rigidbody2D>();
         rigidbody2D.gravityScale = 0f;
@@ -124,6 +149,7 @@ public class GameBootstrap : MonoBehaviour
         PlayerController playerController = playerObject.AddComponent<PlayerController>();
         playerController.InitializeBounds(ArenaMinX, ArenaMaxX, ArenaMinY, ArenaMaxY);
         playerObject.AddComponent<WeaponManager>();
+        playerObject.AddComponent<PlayerVisual>();
 
         return playerObject;
     }
@@ -131,18 +157,27 @@ public class GameBootstrap : MonoBehaviour
     private static void CreateBackground(Sprite squareSprite)
     {
         GameObject background = new("Background");
-        background.transform.position = new Vector3(0f, 0f, 10f);
-        background.transform.localScale = new Vector3(40f, 24f, 1f);
+        background.transform.position = Vector3.zero;
 
         SpriteRenderer renderer = background.AddComponent<SpriteRenderer>();
-        renderer.sprite = squareSprite;
-        renderer.color = new Color(0.16f, 0.21f, 0.18f);
-        renderer.sortingOrder = -10;
+        Sprite backgroundSprite = PuffPewArt.GetBackgroundSprite();
+        renderer.sprite = backgroundSprite != null ? backgroundSprite : squareSprite;
+        renderer.color = backgroundSprite != null ? Color.white : new Color(0.16f, 0.21f, 0.18f);
+        renderer.sortingOrder = -100;
+
+        if (backgroundSprite != null)
+        {
+            PuffPewArt.SetCoverWorldSize(background.transform, backgroundSprite, 36f, 20f);
+        }
+        else
+        {
+            background.transform.localScale = new Vector3(40f, 24f, 1f);
+        }
     }
 
     private static void EnsureEventSystem()
     {
-        if (FindFirstObjectByType<EventSystem>() != null)
+        if (FindAnyObjectByType<EventSystem>() != null)
         {
             return;
         }
@@ -158,11 +193,33 @@ public class GameBootstrap : MonoBehaviour
 
     private static GameObject CreateCanvasRoot()
     {
-        GameObject canvasObject = new("UI");
-        Canvas canvas = canvasObject.AddComponent<Canvas>();
+        GameObject canvasObject = GameObject.Find("UI");
+        if (canvasObject == null)
+        {
+            canvasObject = new GameObject("UI");
+        }
+
+        Canvas canvas = canvasObject.GetComponent<Canvas>();
+        if (canvas == null)
+        {
+            canvas = canvasObject.AddComponent<Canvas>();
+        }
+
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvasObject.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        canvasObject.AddComponent<GraphicRaycaster>();
+
+        CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
+        if (scaler == null)
+        {
+            scaler = canvasObject.AddComponent<CanvasScaler>();
+        }
+
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+
+        if (canvasObject.GetComponent<GraphicRaycaster>() == null)
+        {
+            canvasObject.AddComponent<GraphicRaycaster>();
+        }
 
         TMP_Settings settings = TMP_Settings.instance;
         if (settings == null)

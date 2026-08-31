@@ -20,20 +20,30 @@ public class EnemySpawner : MonoBehaviour
         }
 
         Vector3 spawnPosition = playerTransform.position + (Vector3)(direction * 10f);
-        GameObject enemyObject = new("Enemy");
+        GameObject enemyObject = new(stats.SizeMultiplier > 1.2f ? "LargeEnemy" : "Enemy");
         enemyObject.transform.position = spawnPosition;
-        enemyObject.transform.localScale = new Vector3(0.75f, 0.75f, 1f);
 
         SpriteRenderer spriteRenderer = enemyObject.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = enemySprite;
-        spriteRenderer.color = new Color(0.95f, 0.38f, 0.38f);
+        spriteRenderer.color = enemySprite == PuffPewArt.GetEnemySprite() ? Color.white : new Color(0.95f, 0.38f, 0.38f);
+        spriteRenderer.sortingOrder = 10;
+
+        if (enemySprite == PuffPewArt.GetEnemySprite())
+        {
+            PuffPewArt.SetUniformWorldSize(enemyObject.transform, enemySprite, 1.45f * stats.SizeMultiplier);
+        }
+        else
+        {
+            float scale = 0.75f * stats.SizeMultiplier;
+            enemyObject.transform.localScale = new Vector3(scale, scale, 1f);
+        }
 
         Rigidbody2D rigidbody2D = enemyObject.AddComponent<Rigidbody2D>();
         rigidbody2D.gravityScale = 0f;
         rigidbody2D.freezeRotation = true;
 
         CircleCollider2D circleCollider = enemyObject.AddComponent<CircleCollider2D>();
-        circleCollider.radius = 0.5f;
+        circleCollider.radius = 0.5f * stats.SizeMultiplier;
 
         Enemy enemy = enemyObject.AddComponent<Enemy>();
         enemy.Initialize(stats, playerTransform, waveManager);

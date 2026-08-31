@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class BombProjectile : MonoBehaviour
 {
+    private const float RotationSpeed = 200f;
+
     private Vector3 targetPosition;
     private float damage;
     private float speed;
@@ -12,11 +14,21 @@ public class BombProjectile : MonoBehaviour
     {
         GameObject projectileObject = new("BombProjectile");
         projectileObject.transform.position = origin;
-        projectileObject.transform.localScale = new Vector3(0.4f, 0.4f, 1f);
 
         SpriteRenderer spriteRenderer = projectileObject.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = RuntimeSpriteFactory.GetCircleSprite();
-        spriteRenderer.color = new Color(1f, 0.65f, 0.25f);
+        Sprite bombSprite = PuffPewArt.GetBombSprite();
+        spriteRenderer.sprite = bombSprite != null ? bombSprite : RuntimeSpriteFactory.GetCircleSprite();
+        spriteRenderer.color = bombSprite != null ? Color.white : new Color(1f, 0.65f, 0.25f);
+        spriteRenderer.sortingOrder = 20;
+
+        if (bombSprite != null)
+        {
+            PuffPewArt.SetUniformWorldSize(projectileObject.transform, bombSprite, 0.9f);
+        }
+        else
+        {
+            projectileObject.transform.localScale = new Vector3(0.4f, 0.4f, 1f);
+        }
 
         CircleCollider2D collider2D = projectileObject.AddComponent<CircleCollider2D>();
         collider2D.isTrigger = true;
@@ -41,6 +53,7 @@ public class BombProjectile : MonoBehaviour
         }
 
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
+        transform.Rotate(0f, 0f, RotationSpeed * Time.deltaTime);
         if (Vector3.Distance(transform.position, targetPosition) <= 0.02f)
         {
             Explode();
@@ -65,6 +78,7 @@ public class BombProjectile : MonoBehaviour
         }
 
         hasExploded = true;
+        BombExplosionEffect.Create(transform.position, explosionRadius);
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
         foreach (Collider2D hit in hits)
         {

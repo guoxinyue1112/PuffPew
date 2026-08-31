@@ -19,18 +19,42 @@ public class AxeWeapon : WeaponBase
     protected override bool TryAttack()
     {
         Enemy target = GetNearestEnemy();
-        if (target == null)
+        float rangeSqr = Range * Range;
+        bool hitAnyEnemy = false;
+        var activeEnemies = GameManager.Instance.EnemyManager.ActiveEnemies;
+        float damage = GetDamage();
+        Vector3 swingTargetPosition = target != null
+            ? target.transform.position
+            : transform.position + transform.up;
+
+        for (int i = activeEnemies.Count - 1; i >= 0; i--)
         {
-            return false;
+            Enemy enemy = activeEnemies[i];
+            if (enemy == null)
+            {
+                continue;
+            }
+
+            if ((enemy.transform.position - transform.position).sqrMagnitude > rangeSqr)
+            {
+                continue;
+            }
+
+            if (!hitAnyEnemy)
+            {
+                swingTargetPosition = enemy.transform.position;
+                hitAnyEnemy = true;
+            }
+
+            enemy.TakeDamage(damage);
         }
 
-        if (Vector2.Distance(transform.position, target.transform.position) > Range)
-        {
-            return false;
-        }
+        PlaySwing(swingTargetPosition);
+        return hitAnyEnemy;
+    }
 
-        PlaySwing(target.transform.position);
-        target.TakeDamage(GetDamage());
+    protected override bool ShouldUseCooldownOnMiss()
+    {
         return true;
     }
 
@@ -41,12 +65,20 @@ public class AxeWeapon : WeaponBase
         swingObject.transform.localPosition = Vector3.zero;
 
         swingRenderer = swingObject.AddComponent<SpriteRenderer>();
-        swingRenderer.sprite = RuntimeSpriteFactory.GetSquareSprite();
-        swingRenderer.color = new Color(1f, 0.88f, 0.48f, 0.92f);
-        swingRenderer.sortingOrder = 8;
+        Sprite axeSprite = PuffPewArt.GetAxeSprite();
+        swingRenderer.sprite = axeSprite != null ? axeSprite : RuntimeSpriteFactory.GetSquareSprite();
+        swingRenderer.color = axeSprite != null ? Color.white : new Color(1f, 0.88f, 0.48f, 0.92f);
+        swingRenderer.sortingOrder = 5;
         swingRenderer.enabled = false;
 
-        swingObject.transform.localScale = new Vector3(0.28f, 1.8f, 1f);
+        if (axeSprite != null)
+        {
+            PuffPewArt.SetUniformWorldSize(swingObject.transform, axeSprite, 1.8f);
+        }
+        else
+        {
+            swingObject.transform.localScale = new Vector3(0.28f, 1.8f, 1f);
+        }
     }
 
     private void PlaySwing(Vector3 targetPosition)

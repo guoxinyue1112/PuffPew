@@ -5,6 +5,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    public Vector2 CurrentMoveInput { get; private set; }
+
     private Rigidbody2D rb;
     private PlayerStats playerStats;
     private float minX;
@@ -34,13 +36,13 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        Vector2 moveInput = ReadMoveInput();
-        if (moveInput.sqrMagnitude > 1f)
+        CurrentMoveInput = ReadMoveInput();
+        if (CurrentMoveInput.sqrMagnitude > 1f)
         {
-            moveInput.Normalize();
+            CurrentMoveInput.Normalize();
         }
 
-        Vector2 nextPosition = rb.position + moveInput * playerStats.MoveSpeed * Time.fixedDeltaTime;
+        Vector2 nextPosition = rb.position + CurrentMoveInput * playerStats.MoveSpeed * Time.fixedDeltaTime;
         nextPosition.x = Mathf.Clamp(nextPosition.x, minX, maxX);
         nextPosition.y = Mathf.Clamp(nextPosition.y, minY, maxY);
         rb.MovePosition(nextPosition);

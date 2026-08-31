@@ -11,11 +11,21 @@ public class Bullet : MonoBehaviour
     {
         GameObject bulletObject = new("Bullet");
         bulletObject.transform.position = origin;
-        bulletObject.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
 
         SpriteRenderer spriteRenderer = bulletObject.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = RuntimeSpriteFactory.GetCircleSprite();
-        spriteRenderer.color = new Color(0.95f, 0.95f, 0.95f);
+        Sprite bulletSprite = PuffPewArt.GetBulletSprite();
+        spriteRenderer.sprite = bulletSprite != null ? bulletSprite : RuntimeSpriteFactory.GetCircleSprite();
+        spriteRenderer.color = bulletSprite != null ? Color.white : new Color(0.95f, 0.95f, 0.95f);
+        spriteRenderer.sortingOrder = 20;
+
+        if (bulletSprite != null)
+        {
+            PuffPewArt.SetUniformWorldSize(bulletObject.transform, bulletSprite, 0.55f);
+        }
+        else
+        {
+            bulletObject.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
+        }
 
         CircleCollider2D collider2D = bulletObject.AddComponent<CircleCollider2D>();
         collider2D.isTrigger = true;
@@ -29,6 +39,9 @@ public class Bullet : MonoBehaviour
         bullet.damage = projectileDamage;
         bullet.speed = projectileSpeed;
         bullet.lifetime = projectileLifetime;
+
+        float angle = Mathf.Atan2(bullet.direction.y, bullet.direction.x) * Mathf.Rad2Deg;
+        bulletObject.transform.rotation = Quaternion.Euler(0f, 0f, angle);
     }
 
     private void Update()

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97abfab209b14dd439dedf8b63f34f2d, type: 3}
+  m_Name: PuffPewArtConfig
+  m_EditorClassIdentifier: Assembly-CSharp::PuffPewArtConfig
+  backgroundPath: Assets/Resources/background.png
+  playerTexturePath: Assets/Resources/Player.png
+  enemyPath: Assets/Resources/anemy.png
+  bulletPath: Assets/Resources/bullet.png
+  pistolPath: Assets/Resources/gun.png
+  axePath: Assets/Resources/axe.png
+  bombPath: Assets/Resources/bomb.png
+  backgroundSprite: {fileID: 21300000, guid: e47d9a95f5b7c374bb91393542c764ad, type: 3}
+  playerLeftSprite: {fileID: 7152930139536384079, guid: 3b799236117a8ca458bcd650b340e8c4, type: 3}
+  playerRightSprite: {fileID: -1708661419, guid: 3b799236117a8ca458bcd650b340e8c4, type: 3}
+  enemySprite: {fileID: 21300000, guid: d08ff74c7b184aa46b6127daf3fa918c, type: 3}
+  bulletSprite: {fileID: 21300000, guid: 60e3c3748dc098947a3c82736424efd7, type: 3}
+  pistolSprite: {fileID: 21300000, guid: a52ac220bc2cbf649a940a8abec84da0, type: 3}
+  axeSprite: {fileID: 21300000, guid: f3118923cf81e2e4d948e7f37c2232a3, type: 3}
+  bombSprite: {fileID: 21300000, guid: bb599d3bde7a8e8469ba6b9810a1f52e, type: 3}
